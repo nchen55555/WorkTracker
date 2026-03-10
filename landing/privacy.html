@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Niche</title>
+    <link rel="icon" type="image/png" href="/public/icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#C5A233',
+                            'gold-light': '#FFDE59',
+                            cream: '#FFFDF7',
+                            'cream-dark': '#F5EED9',
+                            text: '#4A4A42',
+                            'text-light': '#8B8B7A',
+                            border: '#E8E0D0',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['IBM Plex Sans', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-cream text-brand-text font-sans">
+
+    <!-- Nav -->
+    <nav class="max-w-3xl mx-auto px-6 py-6 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3">
+            <img src="/public/icon.png" alt="Niche" class="w-10 h-10 rounded-lg">
+            <span class="font-serif font-semibold text-xl text-brand-gold">Niche</span>
+        </a>
+        <a href="/" class="text-sm text-brand-text-light hover:text-brand-text transition">&larr; Back to Home</a>
+    </nav>
+
+    <!-- Content -->
+    <main class="max-w-3xl mx-auto px-6 pt-12 pb-24">
+        <h1 class="font-serif text-4xl font-bold mb-2">Privacy Policy</h1>
+        <p class="text-brand-text-light mb-12">Last updated: March 10, 2026</p>
+
+        <div class="space-y-10 text-[15px] leading-relaxed">
+            <section>
+                <h2 class="font-semibold text-lg mb-3">Overview</h2>
+                <p class="text-brand-text-light">Niche ("we", "our", "the app") is a desktop productivity application that helps you track tasks, meetings, and notes. We are committed to protecting your privacy and being transparent about how we handle your data.</p>
+            </section>
+
+            <section>
+                <h2 class="font-semibold text-lg mb-3">What Data We Collect</h2>
+                <p class="text-brand-text-light mb-3">When you use Niche, we may collect and store the following information:</p>
+                <ul class="list-disc list-inside text-brand-text-light space-y-1.5 ml-2">
+                    <li><strong class="text-brand-text">Account information:</strong> Your email address and basic profile information when you sign in with Google.</li>
+                    <li><strong class="text-brand-text">App content:</strong> Tasks, meetings, notes, and categories you create within the app.</li>
+                    <li><strong class="text-brand-text">Google Calendar data:</strong> Calendar event details (title, time, attendees, location) from Google Calendars you choose to sync.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="font-semibold text-lg mb-3">How We Use Your Data</h2>
+                <p class="text-brand-text-light mb-3">Your data is used solely to provide and improve the Niche app experience:</p>
+                <ul class="list-disc list-inside text-brand-text-light space-y-1.5 ml-2">
+                    <li>To authenticate your account and sync your data across sessions.</li>
+                    <li>To display your Google Calendar events alongside your tasks and meetings.</li>
+                    <li>To store your tasks, meetings, notes, and preferences so they persist between sessions.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="font-semibold text-lg mb-3">How We Store Your Data</h2>
+                <p class="text-brand-text-light">Your data is stored securely using <a href="https://supabase.com" class="text-brand-gold hover:underline" target="_blank" rel="noopener">Supabase</a>, a hosted database platform. Data is transmitted over encrypted connections (HTTPS/TLS). Your Google Calendar data is fetched in real-time and is not permanently stored on our servers beyond what is needed for display in the app.</p>
+            </section>
+
+            <section>
+                <h2 class="font-semibold text-lg mb-3">Google Calendar Access</h2>
+                <p class="text-brand-text-light mb-3">Niche requests read-only access to your Google Calendar data. Specifically:</p>
+                <ul class="list-disc list-inside text-brand-text-light space-y-1.5 ml-2">
+                    <li>We only read calendar events — we never create, modify, or delete events in your Google Calendar.</li>
+                    <li>You choose which calendars to sync. You can disconnect at any time.</li>
+                    <li>Calendar data is used only to display events within the Niche app.</li>
+                    <li>We do not share your Google Calendar data with any third parties.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="font-semibold text-lg mb-3">Data Sharing</h2>
+                <p class="text-brand-text-light">We do not sell, rent, or share your personal data with third parties. Your data is yours.</p>
+            </section>
+
+            <section>
+                <h2 class="font-semibold text-lg mb-3">Data Deletion</h2>
+                <p class="text-brand-text-light">You can delete your account and all associated data at any time by contacting us. Upon deletion, all your data (tasks, meetings, notes, and account information) will be permanently removed from our systems.</p>
+            </section>
+
+            <section>
+                <h2 class="font-semibold text-lg mb-3">Changes to This Policy</h2>
+                <p class="text-brand-text-light">We may update this privacy policy from time to time. Any changes will be reflected on this page with an updated "Last updated" date.</p>
+            </section>
+
+            <section>
+                <h2 class="font-semibold text-lg mb-3">Contact</h2>
+                <p class="text-brand-text-light">If you have any questions about this privacy policy or your data, please contact us at <a href="mailto:hello@theniche.tech" class="text-brand-gold hover:underline">hello@theniche.tech</a>.</p>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-3xl mx-auto px-6 pb-10">
+        <div class="border-t border-brand-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-brand-text-light">
+            <p>&copy; 2026 Niche. All rights reserved.</p>
+            <a href="/" class="hover:text-brand-text transition">Home</a>
+        </div>
+    </footer>
+
+</body>
+</html>
