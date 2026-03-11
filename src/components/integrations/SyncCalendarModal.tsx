@@ -25,6 +25,7 @@ export function SyncCalendarModal({ isOpen, onClose }: SyncCalendarModalProps) {
     setAccountCalendars,
     toggleCalendarSelection,
     renameCalendar,
+    setFreeBusyTitle,
     removeAccount,
     reset,
   } = useGoogleCalendarStore();
@@ -125,7 +126,7 @@ export function SyncCalendarModal({ isOpen, onClose }: SyncCalendarModalProps) {
 
       // Preserve selection state and custom names from previously loaded calendars
       const previousCalendars = new Map(
-        account.calendars.map((c) => [c.id, { selected: c.selected, displayName: c.displayName }])
+        account.calendars.map((c) => [c.id, { selected: c.selected, displayName: c.displayName, freeBusyTitle: c.freeBusyTitle }])
       );
 
       const mergedList = calendarList.map((cal) => {
@@ -134,6 +135,7 @@ export function SyncCalendarModal({ isOpen, onClose }: SyncCalendarModalProps) {
           ...cal,
           selected: previous?.selected ?? cal.selected,
           displayName: previous?.displayName,
+          freeBusyTitle: previous?.freeBusyTitle,
         };
       });
 
@@ -316,104 +318,129 @@ export function SyncCalendarModal({ isOpen, onClose }: SyncCalendarModalProps) {
                           const isEditing = editingAccountId === account.id && editingCalendarId === calendar.id;
                           const displayName = calendar.displayName || calendar.name;
 
+                          const isFreeBusy = calendar.accessRole === "freeBusyReader";
+
                           return (
                             <div
                               key={calendar.id}
                               className={cn(
-                                "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                                "flex flex-col gap-1 px-3 py-2 rounded-lg transition-colors",
                                 calendar.selected
                                   ? "bg-[#FFFDF7]"
                                   : "hover:bg-background-hover"
                               )}
                             >
-                              {/* Checkbox */}
-                              <button
-                                onClick={() => toggleCalendarSelection(account.id, calendar.id)}
-                                className={cn(
-                                  "w-4 h-4 rounded flex items-center justify-center border-2 transition-colors flex-shrink-0",
-                                  calendar.selected
-                                    ? "bg-[#FFDE59] border-[#FFDE59]"
-                                    : "border-gray-300 bg-white"
-                                )}
-                              >
-                                {calendar.selected && (
-                                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                    <path
-                                      d="M1 4L3.5 6.5L9 1"
-                                      stroke="#5C4A1F"
-                                      strokeWidth="1.5"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                )}
-                              </button>
-
-                              {/* Color Dot */}
-                              <div
-                                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                                style={{ backgroundColor: calendar.color }}
-                              />
-
-                              {/* Calendar Name */}
-                              {isEditing ? (
-                                <div className="flex-1 flex items-center gap-2">
-                                  <input
-                                    type="text"
-                                    value={editingName}
-                                    onChange={(e) => setEditingName(e.target.value)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter") saveRename();
-                                      if (e.key === "Escape") cancelEditing();
-                                    }}
-                                    autoFocus
-                                    className="flex-1 px-2 py-1 text-sm border border-[#FFDE59] rounded focus:outline-none focus:ring-1 focus:ring-[#FFDE59]"
-                                  />
-                                  <button
-                                    onClick={saveRename}
-                                    className="p-1 text-green-600 hover:bg-green-50 rounded"
-                                  >
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                      <path d="M2 7L5 10L12 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                  </button>
-                                  <button
-                                    onClick={cancelEditing}
-                                    className="p-1 text-gray-400 hover:bg-gray-100 rounded"
-                                  >
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                      <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                    </svg>
-                                  </button>
-                                </div>
-                              ) : (
-                                <>
-                                  <span
-                                    className="flex-1 text-sm text-text-primary truncate cursor-pointer"
-                                    onClick={() => toggleCalendarSelection(account.id, calendar.id)}
-                                  >
-                                    {displayName}
-                                  </span>
-
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      startEditing(account.id, calendar.id, displayName);
-                                    }}
-                                    className="p-1 text-text-muted hover:text-text-primary hover:bg-background-hover rounded opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                                    title="Rename"
-                                  >
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                              <div className="flex items-center gap-3">
+                                {/* Checkbox */}
+                                <button
+                                  onClick={() => toggleCalendarSelection(account.id, calendar.id)}
+                                  className={cn(
+                                    "w-4 h-4 rounded flex items-center justify-center border-2 transition-colors flex-shrink-0",
+                                    calendar.selected
+                                      ? "bg-[#FFDE59] border-[#FFDE59]"
+                                      : "border-gray-300 bg-white"
+                                  )}
+                                >
+                                  {calendar.selected && (
+                                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
                                       <path
-                                        d="M9 1L11 3L4 10L1 11L2 8L9 1Z"
-                                        stroke="currentColor"
-                                        strokeWidth="1.25"
+                                        d="M1 4L3.5 6.5L9 1"
+                                        stroke="#5C4A1F"
+                                        strokeWidth="1.5"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                       />
                                     </svg>
-                                  </button>
-                                </>
+                                  )}
+                                </button>
+
+                                {/* Color Dot */}
+                                <div
+                                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                  style={{ backgroundColor: calendar.color }}
+                                />
+
+                                {/* Calendar Name */}
+                                {isEditing ? (
+                                  <div className="flex-1 flex items-center gap-2">
+                                    <input
+                                      type="text"
+                                      value={editingName}
+                                      onChange={(e) => setEditingName(e.target.value)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") saveRename();
+                                        if (e.key === "Escape") cancelEditing();
+                                      }}
+                                      autoFocus
+                                      className="flex-1 px-2 py-1 text-sm border border-[#FFDE59] rounded focus:outline-none focus:ring-1 focus:ring-[#FFDE59]"
+                                    />
+                                    <button
+                                      onClick={saveRename}
+                                      className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                    >
+                                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                        <path d="M2 7L5 10L12 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                      </svg>
+                                    </button>
+                                    <button
+                                      onClick={cancelEditing}
+                                      className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+                                    >
+                                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                        <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div className="flex-1 min-w-0">
+                                      <span
+                                        className="text-sm text-text-primary truncate cursor-pointer block"
+                                        onClick={() => toggleCalendarSelection(account.id, calendar.id)}
+                                      >
+                                        {displayName}
+                                      </span>
+                                      {isFreeBusy && (
+                                        <span className="text-xs text-text-muted">Free/busy only</span>
+                                      )}
+                                    </div>
+
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        startEditing(account.id, calendar.id, displayName);
+                                      }}
+                                      className="p-1 text-text-muted hover:text-text-primary hover:bg-background-hover rounded opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                                      title="Rename"
+                                    >
+                                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                        <path
+                                          d="M9 1L11 3L4 10L1 11L2 8L9 1Z"
+                                          stroke="currentColor"
+                                          strokeWidth="1.25"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+
+                              {/* Free/busy event title input */}
+                              {isFreeBusy && calendar.selected && (
+                                <div className="ml-[2.125rem] mt-1">
+                                  <input
+                                    type="text"
+                                    value={calendar.freeBusyTitle || ""}
+                                    onChange={(e) => setFreeBusyTitle(account.id, calendar.id, e.target.value)}
+                                    placeholder="Event title (default: Busy)"
+                                    className="w-full px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#FFDE59] focus:border-[#FFDE59] placeholder:text-gray-400"
+                                  />
+                                  <p className="text-[10px] text-text-muted mt-0.5">
+                                    Title used for events from this calendar
+                                  </p>
+                                </div>
                               )}
                             </div>
                           );

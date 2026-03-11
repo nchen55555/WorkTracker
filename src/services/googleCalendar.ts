@@ -55,14 +55,13 @@ export async function fetchGoogleCalendarList(
 
   const data: GoogleCalendarListResponse = await response.json();
 
-  // Include all calendars except freeBusyReader (which can't see event details)
   return (data.items || [])
-    .filter((cal) => cal.accessRole !== "freeBusyReader")
     .map((cal) => ({
       id: cal.id,
       name: cal.summary,
       color: cal.backgroundColor,
       selected: cal.primary || false, // Primary calendar selected by default
+      accessRole: cal.accessRole,
     }));
 }
 

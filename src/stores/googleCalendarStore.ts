@@ -19,6 +19,7 @@ interface GoogleCalendarState {
   setAccountCalendars: (accountId: string, calendars: GoogleCalendar[]) => void;
   toggleCalendarSelection: (accountId: string, calendarId: string) => void;
   renameCalendar: (accountId: string, calendarId: string, displayName: string) => void;
+  setFreeBusyTitle: (accountId: string, calendarId: string, title: string) => void;
 
   // Sync state
   setSyncing: (syncing: boolean) => void;
@@ -119,6 +120,22 @@ export const useGoogleCalendarStore = create<GoogleCalendarState>()(
                   calendars: a.calendars.map((cal) =>
                     cal.id === calendarId
                       ? { ...cal, displayName: displayName.trim() || undefined }
+                      : cal
+                  ),
+                }
+              : a
+          ),
+        })),
+
+      setFreeBusyTitle: (accountId, calendarId, title) =>
+        set((state) => ({
+          accounts: state.accounts.map((a) =>
+            a.id === accountId
+              ? {
+                  ...a,
+                  calendars: a.calendars.map((cal) =>
+                    cal.id === calendarId
+                      ? { ...cal, freeBusyTitle: title || undefined }
                       : cal
                   ),
                 }

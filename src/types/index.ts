@@ -89,6 +89,8 @@ export interface GoogleCalendar {
   displayName?: string;
   color: string;
   selected: boolean;
+  accessRole?: string;
+  freeBusyTitle?: string;
 }
 
 export interface GoogleAccount {

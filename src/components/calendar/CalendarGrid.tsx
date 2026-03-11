@@ -166,8 +166,8 @@ export function CalendarGrid({
     const maxY = Math.max(dragStartY, dragCurrentY);
     const height = maxY - minY;
 
-    // Minimum height of 15 minutes (15 pixels)
-    const adjustedHeight = Math.max(height, 15);
+    // Minimum height of 30 minutes (30 pixels)
+    const adjustedHeight = Math.max(height, 30);
     const adjustedMaxY = minY + adjustedHeight;
 
     const startTime = pixelToTime(minY, 15, startHour);

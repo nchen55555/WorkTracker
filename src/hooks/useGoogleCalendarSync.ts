@@ -154,6 +154,14 @@ export function useGoogleCalendarSync() {
     // Get selected calendars with their names for category creation
     const selectedCalendars = account.calendars.filter((cal) => calendarIds.includes(cal.id));
 
+    // Build a map of calendar ID to freeBusyTitle for freeBusyReader calendars
+    const freeBusyTitleMap = new Map<string, string>();
+    for (const cal of selectedCalendars) {
+      if (cal.accessRole === "freeBusyReader") {
+        freeBusyTitleMap.set(cal.id, cal.freeBusyTitle?.trim() || "Busy");
+      }
+    }
+
     // Find or create a category for each Google Calendar
     const calendarToCategoryMap = new Map<string, string>();
 
@@ -276,6 +284,15 @@ export function useGoogleCalendarSync() {
 
     for (const event of events) {
       const meetingData = mapGoogleEventToMeeting(event);
+
+      // Override title for freeBusyReader calendars
+      if (event.calendarId && freeBusyTitleMap.has(event.calendarId)) {
+        const customTitle = freeBusyTitleMap.get(event.calendarId)!;
+        if (!event.summary || meetingData.title === "(No title)") {
+          meetingData.title = customTitle;
+        }
+      }
+
       const existingId = existingMap.get(event.id);
 
       // Get category for this event's calendar

@@ -1,3 +1,4 @@
+import React from "react";
 import { cn } from "@/utils/cn";
 import type { CalendarEvent } from "@/types";
 
@@ -36,10 +37,12 @@ const categoryStyles: Record<string, { bg: string; border: string; text: string 
 
 export function EventBlock({ event, style, onClick, onResizeStart, onMoveStart, isResizing, isMoving }: EventBlockProps) {
   const styles = categoryStyles[event.categoryColor] || categoryStyles.yellow;
+  const mouseDownPos = React.useRef<{ x: number; y: number } | null>(null);
 
   const handleResizeMouseDown = (e: React.MouseEvent, edge: "top" | "bottom") => {
     e.stopPropagation();
     e.preventDefault();
+    mouseDownPos.current = null; // Suppress click after resize
     onResizeStart?.(e, edge);
   };
 
@@ -49,14 +52,25 @@ export function EventBlock({ event, style, onClick, onResizeStart, onMoveStart, 
     if (target.dataset.resizeHandle) return;
 
     e.stopPropagation();
-    e.preventDefault();
+    mouseDownPos.current = { x: e.clientX, y: e.clientY };
     onMoveStart?.(e);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!mouseDownPos.current) return;
+
+    const dx = e.clientX - mouseDownPos.current.x;
+    const dy = e.clientY - mouseDownPos.current.y;
+
+    if (Math.abs(dx) <= 3 && Math.abs(dy) <= 3) {
+      onClick?.();
+    }
   };
 
   return (
     <div
       data-event
-      onClick={onClick}
+      onClick={handleClick}
       onMouseDown={handleMoveMouseDown}
       className={cn(
         "absolute rounded-sm border-l-[3px] px-2 py-1.5 overflow-hidden cursor-grab hover:brightness-95 transition-all group",
