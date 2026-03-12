@@ -26,6 +26,15 @@ export interface Category {
   sortOrder: number;
 }
 
+export interface TimeEntry {
+  id: string;
+  taskId: string;
+  scheduledDate: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+}
+
 export interface Task {
   id: string;
   categoryId: string;
@@ -38,6 +47,7 @@ export interface Task {
   isCompleted: boolean;
   isArchived: boolean;
   googleEventId?: string;
+  timeEntries?: TimeEntry[];
 }
 
 export interface Meeting {
@@ -72,6 +82,7 @@ export interface Note {
 
 export interface CalendarEvent {
   id: string;
+  taskId?: string;
   title: string;
   type: "task" | "meeting";
   categoryColor: CategoryColor;

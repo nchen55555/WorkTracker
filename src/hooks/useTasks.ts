@@ -127,10 +127,6 @@ export function useCreateTask() {
             category_id: validCategoryId,
             title: input.title,
             description: input.description,
-            scheduled_date: input.scheduledDate,
-            start_time: input.startTime,
-            end_time: input.endTime,
-            duration_minutes: input.durationMinutes,
             is_completed: false,
           };
           console.log("[useCreateTask] Insert payload:", insertPayload);
@@ -156,11 +152,12 @@ export function useCreateTask() {
             categoryId: data.category_id,
             title: data.title,
             description: data.description,
-            scheduledDate: data.scheduled_date,
-            startTime: data.start_time,
-            endTime: data.end_time,
-            durationMinutes: data.duration_minutes,
+            scheduledDate: data.scheduled_date || undefined,
+            startTime: data.start_time || undefined,
+            endTime: data.end_time || undefined,
+            durationMinutes: data.duration_minutes || undefined,
             isCompleted: data.is_completed,
+            isArchived: data.is_archived || false,
           } as Task;
         } else {
           console.log("[useCreateTask] No user, falling back to localStorage");
@@ -228,19 +225,16 @@ export function useUpdateTask() {
         }
       }
 
+      const updatePayload: Record<string, any> = {};
+      if (validCategoryId !== undefined) updatePayload.category_id = validCategoryId;
+      if (updates.title !== undefined) updatePayload.title = updates.title;
+      if (updates.description !== undefined) updatePayload.description = updates.description;
+      if (updates.isCompleted !== undefined) updatePayload.is_completed = updates.isCompleted;
+      if (updates.isArchived !== undefined) updatePayload.is_archived = updates.isArchived;
+
       const { error } = await supabase
         .from("tasks")
-        .update({
-          category_id: validCategoryId,
-          title: updates.title,
-          description: updates.description,
-          scheduled_date: updates.scheduledDate,
-          start_time: updates.startTime,
-          end_time: updates.endTime,
-          duration_minutes: updates.durationMinutes,
-          is_completed: updates.isCompleted,
-          is_archived: updates.isArchived,
-        })
+        .update(updatePayload)
         .eq("id", id);
 
       if (error) throw error;

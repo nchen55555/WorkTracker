@@ -1,6 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/utils/cn";
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory, useMergeCategories } from "@/hooks/useCategories";
+import { useTasks } from "@/hooks/useTasks";
+import { useTimeEntries, useCreateTimeEntry, useDeleteTimeEntry } from "@/hooks/useTimeEntries";
+import { formatDayDateTime, formatTimeSimple } from "@/utils/dates";
 import type { Task, Category, CategoryColor } from "@/types";
 
 interface AddTaskModalProps {
@@ -74,6 +77,12 @@ export function AddTaskModal({
   const deleteCategory = useDeleteCategory();
   const mergeCategories = useMergeCategories();
 
+  // Existing tasks for "pick existing" dropdown
+  const { data: allTasks = [] } = useTasks();
+  const { data: allTimeEntries = [] } = useTimeEntries();
+  const createTimeEntry = useCreateTimeEntry();
+  const deleteTimeEntry = useDeleteTimeEntry();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [scheduledDate, setScheduledDate] = useState("");
@@ -112,6 +121,28 @@ export function AddTaskModal({
   const [editingCategoryColor, setEditingCategoryColor] = useState<CategoryColor>("yellow");
   const [showMergePickerForId, setShowMergePickerForId] = useState<string | null>(null);
 
+  // Existing task selection state
+  const [selectedExistingTaskId, setSelectedExistingTaskId] = useState<string | null>(null);
+  const [showExistingTaskDropdown, setShowExistingTaskDropdown] = useState(false);
+  const [existingTaskSearch, setExistingTaskSearch] = useState("");
+
+  // The effective task id for time entry operations
+  const effectiveTaskId = mode === "edit" && initialTask?.id ? initialTask.id : selectedExistingTaskId;
+
+  // Time entries for the currently selected/edited task
+  const taskTimeEntries = useMemo(() => {
+    if (!effectiveTaskId) return [];
+    return allTimeEntries.filter((e) => e.taskId === effectiveTaskId);
+  }, [effectiveTaskId, allTimeEntries]);
+
+  // Filtered tasks for dropdown search
+  const filteredExistingTasks = useMemo(() => {
+    const available = allTasks.filter((t) => !t.isCompleted && !t.isArchived);
+    if (!existingTaskSearch.trim()) return available;
+    const search = existingTaskSearch.toLowerCase();
+    return available.filter((t) => t.title.toLowerCase().includes(search));
+  }, [allTasks, existingTaskSearch]);
+
   // Initialize form when modal opens or initialTask changes
   useEffect(() => {
     if (isOpen) {
@@ -147,6 +178,9 @@ export function AddTaskModal({
       setEditingCategoryName("");
       setEditingCategoryColor("yellow");
       setShowMergePickerForId(null);
+      setSelectedExistingTaskId(null);
+      setShowExistingTaskDropdown(false);
+      setExistingTaskSearch("");
     }
   }, [isOpen, initialTask, categories, categoriesLoading]);
 
@@ -162,13 +196,58 @@ export function AddTaskModal({
     return `${endHours.toString().padStart(2, "0")}:${endMinutes.toString().padStart(2, "0")}`;
   }
 
+  const handleSelectExistingTask = (task: Task) => {
+    setSelectedExistingTaskId(task.id);
+    setTitle(task.title);
+    setDescription(task.description || "");
+    setCategoryId(task.categoryId || categories[0]?.id || "");
+    setShowExistingTaskDropdown(false);
+    setExistingTaskSearch("");
+    // Reset time fields to defaults for adding a new time block
+    setScheduledDate(getDefaultDate());
+    setHasTime(true);
+    setStartTime("09:00");
+    setDuration(60);
+  };
+
+  const handleClearExistingTask = () => {
+    setSelectedExistingTaskId(null);
+    setTitle("");
+    setDescription("");
+    setCategoryId(categories[0]?.id || "");
+    setScheduledDate(getDefaultDate());
+    setHasTime(false);
+    setStartTime("09:00");
+    setDuration(60);
+  };
+
+  const handleAddTimeEntry = async () => {
+    if (!effectiveTaskId || !hasTime || !scheduledDate) return;
+    const endTime = calculateEndTime(startTime, duration);
+    await createTimeEntry.mutateAsync({
+      taskId: effectiveTaskId,
+      scheduledDate,
+      startTime,
+      endTime,
+      durationMinutes: duration,
+    });
+    // Reset time fields for adding another
+    setStartTime("09:00");
+    setDuration(60);
+    setScheduledDate(getDefaultDate());
+  };
+
+  const handleDeleteTimeEntry = async (entryId: string) => {
+    await deleteTimeEntry.mutateAsync(entryId);
+  };
+
   const handleSave = () => {
     if (!title.trim()) return;
 
     onSave({
       title: title.trim(),
       description: description.trim() || undefined,
-      scheduledDate: scheduledDate || undefined,
+      scheduledDate: hasTime ? scheduledDate || undefined : undefined,
       startTime: hasTime ? startTime : undefined,
       endTime: hasTime ? calculateEndTime(startTime, duration) : undefined,
       durationMinutes: hasTime ? duration : undefined,
@@ -240,6 +319,9 @@ export function AddTaskModal({
 
   const selectedCategory = categories.find((c) => c.id === categoryId);
 
+  // Whether we're in "existing task" mode (selected an existing task in create, or editing)
+  const isExistingTaskMode = !!selectedExistingTaskId || mode === "edit";
+
   if (!isOpen) return null;
 
   return (
@@ -274,6 +356,65 @@ export function AddTaskModal({
 
         {/* Form */}
         <div className="px-6 pb-6 space-y-5">
+          {/* Existing Task Selector - only in create mode */}
+          {mode === "create" && (
+            <div>
+              <label className="block text-xs font-medium uppercase tracking-wide text-text-muted mb-2">
+                Existing Task
+              </label>
+              {selectedExistingTaskId ? (
+                <div className="flex items-center gap-2 px-4 py-3 bg-[#FFF8E1] border border-[#FFDE59] rounded-lg">
+                  <span className="flex-1 text-text-primary font-medium truncate">
+                    {allTasks.find((t) => t.id === selectedExistingTaskId)?.title || title}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleClearExistingTask}
+                    className="p-1 rounded hover:bg-[#FFD633] transition-colors"
+                    title="Clear selection"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                      <path d="M1 1L13 13M1 13L13 1" stroke="#8B7355" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={existingTaskSearch}
+                    onChange={(e) => {
+                      setExistingTaskSearch(e.target.value);
+                      setShowExistingTaskDropdown(true);
+                    }}
+                    onFocus={() => setShowExistingTaskDropdown(true)}
+                    placeholder="Search existing tasks or leave blank for new..."
+                    className="w-full px-4 py-3 bg-white border border-border-subtle rounded-lg text-text-primary placeholder:text-text-muted focus:border-[#FFDE59] focus:ring-1 focus:ring-[#FFDE59] transition-colors"
+                  />
+                  {showExistingTaskDropdown && filteredExistingTasks.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border-subtle rounded-lg shadow-lg z-20 py-1 max-h-[200px] overflow-y-auto">
+                      {filteredExistingTasks.map((task) => (
+                        <button
+                          key={task.id}
+                          type="button"
+                          onClick={() => handleSelectExistingTask(task)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-background-hover transition-colors"
+                        >
+                          <span className="text-text-primary truncate">{task.title}</span>
+                          {allTimeEntries.filter((e) => e.taskId === task.id).length > 0 && (
+                            <span className="text-xs text-text-muted flex-shrink-0">
+                              {allTimeEntries.filter((e) => e.taskId === task.id).length} block{allTimeEntries.filter((e) => e.taskId === task.id).length !== 1 ? "s" : ""}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Task Name */}
           <div>
             <label className="block text-xs font-medium uppercase tracking-wide text-text-muted mb-2">
@@ -284,7 +425,11 @@ export function AddTaskModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter task name..."
-              className="w-full px-4 py-3 bg-white border border-border-subtle rounded-lg text-text-primary placeholder:text-text-muted focus:border-[#FFDE59] focus:ring-1 focus:ring-[#FFDE59] transition-colors"
+              readOnly={!!selectedExistingTaskId}
+              className={cn(
+                "w-full px-4 py-3 bg-white border border-border-subtle rounded-lg text-text-primary placeholder:text-text-muted focus:border-[#FFDE59] focus:ring-1 focus:ring-[#FFDE59] transition-colors",
+                selectedExistingTaskId && "bg-[#F9F9F6] cursor-default"
+              )}
             />
           </div>
 
@@ -298,16 +443,70 @@ export function AddTaskModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add a brief description..."
-              className="w-full px-4 py-3 bg-white border border-border-subtle rounded-lg text-text-primary placeholder:text-text-muted focus:border-[#FFDE59] focus:ring-1 focus:ring-[#FFDE59] transition-colors resize-none overflow-hidden"
+              readOnly={!!selectedExistingTaskId}
+              className={cn(
+                "w-full px-4 py-3 bg-white border border-border-subtle rounded-lg text-text-primary placeholder:text-text-muted focus:border-[#FFDE59] focus:ring-1 focus:ring-[#FFDE59] transition-colors resize-none overflow-hidden",
+                selectedExistingTaskId && "bg-[#F9F9F6] cursor-default"
+              )}
               style={{ minHeight: "60px" }}
             />
           </div>
 
+          {/* Existing Time Entries list */}
+          {isExistingTaskMode && taskTimeEntries.length > 0 && (
+            <div>
+              <label className="block text-xs font-medium uppercase tracking-wide text-text-muted mb-2">
+                Time Blocks ({taskTimeEntries.length})
+              </label>
+              <div className="space-y-2">
+                {taskTimeEntries.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="flex items-center gap-3 px-4 py-2.5 bg-[#F9F9F6] border border-border-subtle rounded-lg"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm text-text-primary">
+                        {formatDayDateTime(entry.scheduledDate)}{" "}
+                        {formatTimeSimple(entry.startTime)} – {formatTimeSimple(entry.endTime)}
+                      </span>
+                      <span className="text-xs text-text-muted ml-2">
+                        ({entry.durationMinutes}min)
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteTimeEntry(entry.id)}
+                      className="p-1.5 rounded text-text-muted hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
+                      title="Remove time block"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Add Time Block section header when in existing task mode */}
+          {isExistingTaskMode && (
+            <div className="h-px bg-border-subtle" />
+          )}
+          {isExistingTaskMode && (
+            <label className="block text-xs font-medium uppercase tracking-wide text-text-muted">
+              Add Time Block
+            </label>
+          )}
+
           {/* Date */}
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wide text-text-muted mb-2">
-              Date
-            </label>
+            {!isExistingTaskMode && (
+              <label className="block text-xs font-medium uppercase tracking-wide text-text-muted mb-2">
+                Date
+              </label>
+            )}
             <input
               type="date"
               value={scheduledDate}
@@ -377,6 +576,23 @@ export function AddTaskModal({
                 </select>
               </div>
             </div>
+          )}
+
+          {/* Add Time Block button when editing existing task */}
+          {isExistingTaskMode && hasTime && (
+            <button
+              type="button"
+              onClick={handleAddTimeEntry}
+              disabled={!scheduledDate || createTimeEntry.isPending}
+              className={cn(
+                "w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-colors",
+                scheduledDate
+                  ? "bg-[#F5F5F0] text-text-primary hover:bg-[#EAEAE5]"
+                  : "bg-[#F5F5F0] text-text-muted cursor-not-allowed"
+              )}
+            >
+              {createTimeEntry.isPending ? "Adding..." : "+ Add Time Block"}
+            </button>
           )}
 
           {/* Category */}

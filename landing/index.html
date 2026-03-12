@@ -3,142 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niche - Your Daily Work Tracker</title>
-    <meta name="description" content="Plan your week visually. Track tasks, meetings, and notes in one beautiful desktop app with Google Calendar sync.">
-    <link rel="icon" type="image/png" href="/public/icon.png">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Niche — Your Daily Work Tracker</title>
+    <meta name="description" content="A minimal desktop app for tracking your daily work. Google Calendar sync built in.">
+    <link rel="icon" type="image/png" href="/worktracker/public/icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #C5A233;
+            --gold-dim: #C5A23344;
+            --cream: #FFFDF7;
+            --cream-dark: #F5EED9;
+            --text: #4A4A42;
+            --text-light: #8B8B7A;
+            --text-muted: #A8A89C;
+            --border: #E8E0D0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--cream);
+            color: var(--text);
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Nav */
+        nav {
+            padding: 32px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.2s;
+        }
+        nav a:hover { color: var(--text); }
+        .nav-links { display: flex; gap: 20px; }
+
+        /* Hero */
+        .hero {
+            padding: 100px 0 80px;
+        }
+        .logo-mark {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 48px;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+        h1 span { color: var(--gold); }
+        .tagline {
+            color: var(--text-light);
+            font-size: 16px;
+            max-width: 440px;
+            margin-bottom: 48px;
+        }
+
+        /* Install block */
+        .install-block {
+            margin-bottom: 16px;
+        }
+        .install-label {
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .install-cmd {
+            background: var(--text);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            overflow-x: auto;
+        }
+        .install-cmd code {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            color: var(--cream);
+            white-space: nowrap;
+            line-height: 1.5;
+        }
+        .install-cmd code .dim { color: #8B8B7A; }
+        .copy-btn {
+            background: none;
+            border: 1px solid #5A5A52;
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: var(--cream);
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .copy-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .copy-btn.copied {
+            border-color: #6B9B6B;
+            color: #8BC48B;
+        }
+        .alt-download {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .alt-download a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+        .alt-download a:hover {
+            text-decoration: underline;
+        }
+
+        /* Divider */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 64px 0;
+        }
+
+        /* Details */
+        .details {
+            padding-bottom: 80px;
+        }
+        .detail-item {
+            display: flex;
+            gap: 16px;
+            align-items: baseline;
+            margin-bottom: 20px;
+        }
+        .detail-key {
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--text);
+            flex-shrink: 0;
+            width: 140px;
+        }
+        .detail-val {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 24px 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        footer a:hover { color: var(--text); }
+        .footer-links { display: flex; gap: 16px; }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .hero { padding: 64px 0 56px; }
+            h1 { font-size: 36px; }
+            .tagline { font-size: 15px; }
+            .install-cmd { padding: 14px 16px; }
+            .install-cmd code { font-size: 12px; }
+            .detail-item { flex-direction: column; gap: 4px; }
+            .detail-key { width: auto; }
+            footer { flex-direction: column; gap: 12px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="/worktracker" style="display: flex; align-items: center; gap: 8px; color: var(--gold); font-family: 'Playfair Display', serif; font-weight: 600; font-size: 18px;">
+                <img src="/worktracker/public/icon.png" alt="Niche" style="width: 32px; height: 32px; border-radius: 8px;">
+                Niche
+            </a>
+            <div class="nav-links">
+                <a href="/worktracker/privacy">Privacy</a>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <h1>Your daily<br><span>work tracker.</span></h1>
+            <p class="tagline">Tasks, calendars, and notes — all in one place. Plan your day with time-slotted and unslotted items side by side. An all-in-one productivity app for macOS.</p>
+
+            <div class="install-block">
+                <p class="install-label">Install</p>
+                <div class="install-cmd">
+                    <code>curl -fsSL <span class="dim">theniche.tech/worktracker/Niche.dmg</span> -o Niche.dmg && open Niche.dmg</code>
+                    <button class="copy-btn" onclick="copyInstall(this)">Copy</button>
+                </div>
+            </div>
+            <p class="alt-download">or <a href="/worktracker/public/Niche.dmg" download>download the .dmg directly</a></p>
+        </section>
+
+        <hr class="divider">
+
+        <section class="details">
+            <div class="detail-item">
+                <span class="detail-key">Daily tasks</span>
+                <span class="detail-val">Create tasks on or off your calendar. Time-slot the important ones, keep the rest as a running list.</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-key">Calendar sync</span>
+                <span class="detail-val">Connect multiple Google accounts. Your events appear inline with your tasks on one unified view.</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-key">Notes</span>
+                <span class="detail-val">Jot down context alongside your work. Meeting notes, ideas, and reminders — all attached to your day.</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-key">One view</span>
+                <span class="detail-val">Everything lives on a weekly calendar. See your full picture — tasks, events, and notes — at a glance.</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-key">Requires</span>
+                <span class="detail-val">macOS 11.0 or later</span>
+            </div>
+        </section>
+
+        <footer>
+            <span>&copy; 2026 Niche</span>
+            <div class="footer-links">
+                <a href="mailto:hello@theniche.tech">Contact</a>
+                <a href="/worktracker/privacy">Privacy</a>
+            </div>
+        </footer>
+    </div>
+
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            gold: '#C5A233',
-                            'gold-light': '#FFDE59',
-                            cream: '#FFFDF7',
-                            'cream-dark': '#F5EED9',
-                            text: '#4A4A42',
-                            'text-light': '#8B8B7A',
-                            border: '#E8E0D0',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['IBM Plex Sans', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                    }
-                }
-            }
+        function copyInstall(btn) {
+            const cmd = 'curl -fsSL theniche.tech/worktracker/Niche.dmg -o Niche.dmg && open Niche.dmg';
+            navigator.clipboard.writeText(cmd).then(() => {
+                btn.textContent = 'Copied';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
         }
     </script>
-</head>
-<body class="bg-brand-cream text-brand-text font-sans">
-
-    <!-- Nav -->
-    <nav class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <img src="/public/icon.png" alt="Niche" class="w-10 h-10 rounded-lg">
-            <span class="font-serif font-semibold text-xl text-brand-gold">Niche</span>
-        </div>
-        <div class="flex items-center gap-6 text-sm text-brand-text-light">
-            <a href="#features" class="hover:text-brand-text transition">Features</a>
-            <a href="#download" class="hover:text-brand-text transition">Download</a>
-            <a href="/privacy" class="hover:text-brand-text transition">Privacy</a>
-        </div>
-    </nav>
-
-    <!-- Hero -->
-    <section class="max-w-5xl mx-auto px-6 pt-20 pb-28 text-center">
-        <div class="inline-block mb-6 px-4 py-1.5 bg-brand-cream-dark rounded-full text-sm text-brand-text-light">
-            Available for macOS
-        </div>
-        <h1 class="font-serif text-5xl md:text-6xl font-bold leading-tight mb-6">
-            Your Daily<br>
-            <span class="text-brand-gold">Work Tracker</span>
-        </h1>
-        <p class="text-lg text-brand-text-light max-w-xl mx-auto mb-10">
-            Plan your week visually. Track tasks, meetings, and notes in one beautiful desktop app — with Google Calendar sync built in.
-        </p>
-        <a href="#download" class="inline-flex items-center gap-2 bg-brand-gold text-white px-8 py-3.5 rounded-xl text-base font-medium hover:opacity-90 transition shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3"/></svg>
-            Download for Mac
-        </a>
-    </section>
-
-    <!-- Features -->
-    <section id="features" class="max-w-5xl mx-auto px-6 pb-28">
-        <h2 class="font-serif text-3xl font-semibold text-center mb-16">Everything you need to stay on track</h2>
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="bg-white rounded-2xl p-8 border border-brand-border">
-                <div class="w-10 h-10 bg-brand-cream-dark rounded-xl flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Visual Weekly Planner</h3>
-                <p class="text-brand-text-light text-sm leading-relaxed">See your entire week at a glance. Drag and drop to rearrange tasks and meetings on an interactive calendar.</p>
-            </div>
-            <div class="bg-white rounded-2xl p-8 border border-brand-border">
-                <div class="w-10 h-10 bg-brand-cream-dark rounded-xl flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Tasks, Meetings & Notes</h3>
-                <p class="text-brand-text-light text-sm leading-relaxed">Three content types in one place. Track your daily work items, schedule meetings, and jot down quick notes.</p>
-            </div>
-            <div class="bg-white rounded-2xl p-8 border border-brand-border">
-                <div class="w-10 h-10 bg-brand-cream-dark rounded-xl flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/></svg>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Color-Coded Categories</h3>
-                <p class="text-brand-text-light text-sm leading-relaxed">Organize work into custom categories with 10 vibrant colors. Instantly see what type of work fills your week.</p>
-            </div>
-            <div class="bg-white rounded-2xl p-8 border border-brand-border">
-                <div class="w-10 h-10 bg-brand-cream-dark rounded-xl flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Google Calendar Sync</h3>
-                <p class="text-brand-text-light text-sm leading-relaxed">Connect your Google accounts and sync your calendars. All your events appear alongside your tasks automatically.</p>
-            </div>
-            <div class="bg-white rounded-2xl p-8 border border-brand-border">
-                <div class="w-10 h-10 bg-brand-cream-dark rounded-xl flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Drag & Drop</h3>
-                <p class="text-brand-text-light text-sm leading-relaxed">Create and move events directly on the calendar. Resize to adjust duration. Planning your day feels effortless.</p>
-            </div>
-            <div class="bg-white rounded-2xl p-8 border border-brand-border">
-                <div class="w-10 h-10 bg-brand-cream-dark rounded-xl flex items-center justify-center mb-4">
-                    <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Archive, Not Delete</h3>
-                <p class="text-brand-text-light text-sm leading-relaxed">Completed work moves to your archive. Keep your workspace clean while maintaining a full history of everything you've done.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Download -->
-    <section id="download" class="max-w-5xl mx-auto px-6 pb-28">
-        <div class="bg-white rounded-3xl border border-brand-border p-12 md:p-16 text-center">
-            <img src="/public/icon.png" alt="Niche" class="w-20 h-20 rounded-2xl mx-auto mb-6">
-            <h2 class="font-serif text-3xl font-semibold mb-3">Download Niche</h2>
-            <p class="text-brand-text-light mb-8">Free for macOS. Lightweight, fast, and private.</p>
-            <a href="/public/Niche.dmg" class="inline-flex items-center gap-2 bg-brand-gold text-white px-8 py-3.5 rounded-xl text-base font-medium hover:opacity-90 transition shadow-sm">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3"/></svg>
-                Download .dmg
-            </a>
-            <p class="text-xs text-brand-text-light mt-4">Requires macOS 11.0 or later</p>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="max-w-5xl mx-auto px-6 pb-10">
-        <div class="border-t border-brand-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-brand-text-light">
-            <p>&copy; 2026 Niche. All rights reserved.</p>
-            <div class="flex items-center gap-6">
-                <a href="/privacy" class="hover:text-brand-text transition">Privacy Policy</a>
-            </div>
-        </div>
-    </footer>
-
 </body>
 </html>

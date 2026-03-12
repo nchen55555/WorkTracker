@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { cn } from "@/utils/cn";
-import { formatDayDateTime, formatTimeSimple } from "@/utils/dates";
+import { formatDayDateTime, formatTimeSimple, formatDuration } from "@/utils/dates";
 import { useModalStore } from "@/stores/modalStore";
 import { useUpdateTask, useArchiveTask, useDeleteTask } from "@/hooks/useTasks";
+import { useTimeEntries } from "@/hooks/useTimeEntries";
 import type { Task } from "@/types";
 
 interface TaskRowProps {
@@ -21,9 +23,39 @@ export function TaskRow({
   const updateTask = useUpdateTask();
   const archiveTask = useArchiveTask();
   const deleteTask = useDeleteTask();
+  const { data: allTimeEntries = [] } = useTimeEntries();
 
-  // Format as "Mon 9:00 – 11:00"
+  // Get time entries for this task
+  const taskTimeEntries = useMemo(
+    () => allTimeEntries.filter((e) => e.taskId === task.id),
+    [allTimeEntries, task.id]
+  );
+
+  // Build display text from time entries or legacy fields
   const getDateTimeDisplay = () => {
+    if (taskTimeEntries.length > 0) {
+      const totalMinutes = taskTimeEntries.reduce((sum, e) => sum + e.durationMinutes, 0);
+      const blockCount = taskTimeEntries.length;
+      const durationText = formatDuration(totalMinutes);
+
+      // Find next upcoming entry
+      const now = new Date();
+      const todayStr = now.toISOString().split("T")[0];
+      const upcoming = taskTimeEntries
+        .filter((e) => e.scheduledDate >= todayStr)
+        .sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate) || a.startTime.localeCompare(b.startTime));
+
+      if (upcoming.length > 0) {
+        const next = upcoming[0];
+        const nextText = `${formatDayDateTime(next.scheduledDate)} ${formatTimeSimple(next.startTime)} – ${formatTimeSimple(next.endTime)}`;
+        return `${durationText} (${blockCount} block${blockCount !== 1 ? "s" : ""}) · Next: ${nextText}`;
+      }
+
+      // All entries are in the past
+      return `${durationText} (${blockCount} block${blockCount !== 1 ? "s" : ""})`;
+    }
+
+    // Legacy: fall back to task's own time fields
     if (!task.scheduledDate) return "";
 
     if (task.startTime && task.endTime) {

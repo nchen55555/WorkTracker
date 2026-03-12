@@ -5,7 +5,8 @@ import { CalendarGrid } from "./CalendarGrid";
 import { useCalendarStore } from "@/stores/calendarStore";
 import { useModalStore, type CreateEventInitialData } from "@/stores/modalStore";
 import { useViewStore } from "@/stores/viewStore";
-import { useTasks, useUpdateTask } from "@/hooks/useTasks";
+import { useTasks } from "@/hooks/useTasks";
+import { useTimeEntries, useUpdateTimeEntry } from "@/hooks/useTimeEntries";
 import { useMeetings, useUpdateMeeting } from "@/hooks/useMeetings";
 import { useCategories } from "@/hooks/useCategories";
 import { getViewDays } from "@/utils/dates";
@@ -16,10 +17,11 @@ export function WeeklyCalendar() {
   const { openEditTaskModal, openEditMeetingModal, openCreateTaskModal, openCreateMeetingModal } = useModalStore();
   const { activeView } = useViewStore();
   const { data: tasks = [] } = useTasks();
+  const { data: timeEntries = [] } = useTimeEntries();
   const { data: meetings = [] } = useMeetings();
   const { data: taskCategories = [] } = useCategories("task");
   const { data: meetingCategories = [] } = useCategories("meeting");
-  const updateTask = useUpdateTask();
+  const updateTimeEntry = useUpdateTimeEntry();
   const updateMeeting = useUpdateMeeting();
 
   const days = getViewDays(currentDate, viewMode);
@@ -37,12 +39,12 @@ export function WeeklyCalendar() {
 
   // Handle event resize on calendar
   const handleEventResize = useCallback((data: { eventId: string; startTime: string; endTime: string; durationMinutes: number }) => {
-    // Find if this is a task or meeting
-    const task = tasks.find((t) => t.id === data.eventId);
+    // Check if this is a time entry or a meeting
+    const timeEntry = timeEntries.find((e) => e.id === data.eventId);
     const meeting = meetings.find((m) => m.id === data.eventId);
 
-    if (task) {
-      updateTask.mutate({
+    if (timeEntry) {
+      updateTimeEntry.mutate({
         id: data.eventId,
         updates: {
           startTime: data.startTime,
@@ -61,16 +63,16 @@ export function WeeklyCalendar() {
         originalMeeting: meeting,
       });
     }
-  }, [tasks, meetings, updateTask, updateMeeting]);
+  }, [timeEntries, meetings, updateTimeEntry, updateMeeting]);
 
   // Handle event move on calendar (drag to different time/day)
   const handleEventMove = useCallback((data: { eventId: string; scheduledDate: string; startTime: string; endTime: string; durationMinutes: number }) => {
-    // Find if this is a task or meeting
-    const task = tasks.find((t) => t.id === data.eventId);
+    // Check if this is a time entry or a meeting
+    const timeEntry = timeEntries.find((e) => e.id === data.eventId);
     const meeting = meetings.find((m) => m.id === data.eventId);
 
-    if (task) {
-      updateTask.mutate({
+    if (timeEntry) {
+      updateTimeEntry.mutate({
         id: data.eventId,
         updates: {
           scheduledDate: data.scheduledDate,
@@ -91,11 +93,13 @@ export function WeeklyCalendar() {
         originalMeeting: meeting,
       });
     }
-  }, [tasks, meetings, updateTask, updateMeeting]);
+  }, [timeEntries, meetings, updateTimeEntry, updateMeeting]);
 
   const handleEventClick = (event: CalendarEvent) => {
     if (event.type === "task") {
-      const task = tasks.find((t) => t.id === event.id);
+      // Use taskId to find the parent task for editing
+      const taskId = event.taskId || event.id;
+      const task = tasks.find((t) => t.id === taskId);
       if (task) openEditTaskModal(task);
     } else {
       const meeting = meetings.find((m) => m.id === event.id);
@@ -103,16 +107,36 @@ export function WeeklyCalendar() {
     }
   };
 
-  // Convert tasks and meetings to calendar events
-  // Only include tasks/meetings that have explicit times set
+  // Convert time entries and meetings to calendar events
   const events = useMemo((): CalendarEvent[] => {
-    // Only get tasks with explicitly scheduled times
-    const taskEvents: CalendarEvent[] = tasks
-      .filter((task) => task.startTime && task.endTime && task.scheduledDate)
+    // Build task events from time entries
+    const taskEvents: CalendarEvent[] = timeEntries
+      .filter((entry) => tasks.some((t) => t.id === entry.taskId))
+      .map((entry) => {
+        const task = tasks.find((t) => t.id === entry.taskId)!;
+        const category = taskCategories.find((c) => c.id === task.categoryId);
+        return {
+          id: entry.id,
+          taskId: entry.taskId,
+          title: task.title,
+          type: "task" as const,
+          categoryColor: category?.color || "development",
+          scheduledDate: entry.scheduledDate,
+          startTime: entry.startTime,
+          endTime: entry.endTime,
+          durationMinutes: entry.durationMinutes,
+        };
+      });
+
+    // Fallback: include tasks with time fields that don't have time entries yet (backward compat)
+    const taskIdsWithEntries = new Set(timeEntries.map((e) => e.taskId));
+    const legacyTaskEvents: CalendarEvent[] = tasks
+      .filter((task) => task.startTime && task.endTime && task.scheduledDate && !taskIdsWithEntries.has(task.id))
       .map((task) => {
         const category = taskCategories.find((c) => c.id === task.categoryId);
         return {
           id: task.id,
+          taskId: task.id,
           title: task.title,
           type: "task" as const,
           categoryColor: category?.color || "development",
@@ -139,8 +163,8 @@ export function WeeklyCalendar() {
       };
     });
 
-    return [...taskEvents, ...meetingEvents];
-  }, [tasks, meetings, taskCategories, meetingCategories]);
+    return [...taskEvents, ...legacyTaskEvents, ...meetingEvents];
+  }, [tasks, timeEntries, meetings, taskCategories, meetingCategories]);
 
   return (
     <div className="flex flex-col h-full">

@@ -1,6 +1,6 @@
-/Users/nicolechen/Documents/Personal/WorkTracker/src-tauri/target/release/deps/zerofrom_derive-d6c7e41164414c5e.d: /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/lib.rs /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/visitor.rs
+/Users/nchen/stripe/WorkTracker/src-tauri/target/release/deps/zerofrom_derive-d6c7e41164414c5e.d: /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/lib.rs /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/visitor.rs
 
-/Users/nicolechen/Documents/Personal/WorkTracker/src-tauri/target/release/deps/libzerofrom_derive-d6c7e41164414c5e.dylib: /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/lib.rs /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/visitor.rs
+/Users/nchen/stripe/WorkTracker/src-tauri/target/release/deps/libzerofrom_derive-d6c7e41164414c5e.dylib: /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/lib.rs /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/visitor.rs
 
-/Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/lib.rs:
-/Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/visitor.rs:
+/Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/lib.rs:
+/Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerofrom-derive-0.1.6/src/visitor.rs:

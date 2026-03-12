@@ -1,5 +1,5 @@
 cargo:rustc-link-lib=framework=Carbon
-OUT_DIR = Some(/Users/nicolechen/Documents/Personal/WorkTracker/src-tauri/target/release/build/tao-950f95e22a95c5d1/out)
+OUT_DIR = Some(/Users/nchen/stripe/WorkTracker/src-tauri/target/release/build/tao-950f95e22a95c5d1/out)
 OPT_LEVEL = Some(3)
 TARGET = Some(aarch64-apple-darwin)
 CARGO_ENCODED_RUSTFLAGS = Some()
@@ -44,4 +44,4 @@ ARFLAGS_aarch64_apple_darwin = None
 cargo:rerun-if-env-changed=ARFLAGS_aarch64-apple-darwin
 ARFLAGS_aarch64-apple-darwin = None
 cargo:rustc-link-lib=static=carbon_hotkey_binding.a
-cargo:rustc-link-search=native=/Users/nicolechen/Documents/Personal/WorkTracker/src-tauri/target/release/build/tao-950f95e22a95c5d1/out
+cargo:rustc-link-search=native=/Users/nchen/stripe/WorkTracker/src-tauri/target/release/build/tao-950f95e22a95c5d1/out

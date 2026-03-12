@@ -10,6 +10,7 @@ import { AddMeetingModal } from "@/components/meetings/AddMeetingModal";
 import { GoogleCalendarStatus } from "@/components/integrations/GoogleCalendarStatus";
 import { ArchiveModal } from "@/components/archive/ArchiveModal";
 import { useCreateTask, useUpdateTask, useDeleteTask, useArchiveTask, useArchivedTasks } from "@/hooks/useTasks";
+import { useCreateTimeEntry } from "@/hooks/useTimeEntries";
 import { useArchivedNotes } from "@/hooks/useNotes";
 import { useCreateMeeting, useUpdateMeeting, useDeleteMeeting, useArchivedMeetings } from "@/hooks/useMeetings";
 import type { Task, Meeting } from "@/types";
@@ -41,6 +42,7 @@ export function LeftPanel() {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const archiveTask = useArchiveTask();
+  const createTimeEntry = useCreateTimeEntry();
 
   // Meeting hooks
   const createMeeting = useCreateMeeting();
@@ -48,19 +50,32 @@ export function LeftPanel() {
   const deleteMeeting = useDeleteMeeting();
 
   // Task handlers
-  const handleSaveTask = (taskData: Partial<Task>) => {
+  const handleSaveTask = async (taskData: Partial<Task>) => {
     if (taskModalMode === "create") {
-      createTask.mutate({
+      const newTask = await createTask.mutateAsync({
         title: taskData.title!,
         categoryId: taskData.categoryId,
         description: taskData.description,
-        scheduledDate: taskData.scheduledDate,
-        startTime: taskData.startTime,
-        endTime: taskData.endTime,
-        durationMinutes: taskData.durationMinutes,
       });
+      // Create a time entry if time was specified
+      if (newTask && taskData.startTime && taskData.endTime && taskData.scheduledDate && taskData.durationMinutes) {
+        createTimeEntry.mutate({
+          taskId: newTask.id,
+          scheduledDate: taskData.scheduledDate,
+          startTime: taskData.startTime,
+          endTime: taskData.endTime,
+          durationMinutes: taskData.durationMinutes,
+        });
+      }
     } else if (editingTask) {
-      updateTask.mutate({ id: editingTask.id, updates: taskData });
+      updateTask.mutate({
+        id: editingTask.id,
+        updates: {
+          title: taskData.title,
+          description: taskData.description,
+          categoryId: taskData.categoryId,
+        },
+      });
     }
   };
 

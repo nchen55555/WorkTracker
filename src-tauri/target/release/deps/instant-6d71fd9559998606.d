@@ -1,8 +1,8 @@
-/Users/nicolechen/Documents/Personal/WorkTracker/src-tauri/target/release/deps/instant-6d71fd9559998606.d: /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/lib.rs /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/native.rs
+/Users/nchen/stripe/WorkTracker/src-tauri/target/release/deps/instant-6d71fd9559998606.d: /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/lib.rs /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/native.rs
 
-/Users/nicolechen/Documents/Personal/WorkTracker/src-tauri/target/release/deps/libinstant-6d71fd9559998606.rlib: /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/lib.rs /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/native.rs
+/Users/nchen/stripe/WorkTracker/src-tauri/target/release/deps/libinstant-6d71fd9559998606.rlib: /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/lib.rs /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/native.rs
 
-/Users/nicolechen/Documents/Personal/WorkTracker/src-tauri/target/release/deps/libinstant-6d71fd9559998606.rmeta: /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/lib.rs /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/native.rs
+/Users/nchen/stripe/WorkTracker/src-tauri/target/release/deps/libinstant-6d71fd9559998606.rmeta: /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/lib.rs /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/native.rs
 
-/Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/lib.rs:
-/Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/native.rs:
+/Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/lib.rs:
+/Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/instant-0.1.13/src/native.rs:

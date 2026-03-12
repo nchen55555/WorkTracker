@@ -1,9 +1,9 @@
-/Users/nicolechen/Documents/Personal/WorkTracker/src-tauri/target/release/build/crossbeam-utils-9a1fb9bb88942def/build_script_build-9a1fb9bb88942def.d: /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build.rs /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/no_atomic.rs /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build-common.rs
+/Users/nchen/stripe/WorkTracker/src-tauri/target/release/build/crossbeam-utils-9a1fb9bb88942def/build_script_build-9a1fb9bb88942def.d: /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build.rs /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/no_atomic.rs /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build-common.rs
 
-/Users/nicolechen/Documents/Personal/WorkTracker/src-tauri/target/release/build/crossbeam-utils-9a1fb9bb88942def/build_script_build-9a1fb9bb88942def: /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build.rs /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/no_atomic.rs /Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build-common.rs
+/Users/nchen/stripe/WorkTracker/src-tauri/target/release/build/crossbeam-utils-9a1fb9bb88942def/build_script_build-9a1fb9bb88942def: /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build.rs /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/no_atomic.rs /Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build-common.rs
 
-/Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build.rs:
-/Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/no_atomic.rs:
-/Users/nicolechen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build-common.rs:
+/Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build.rs:
+/Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/no_atomic.rs:
+/Users/nchen/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-utils-0.8.21/build-common.rs:
 
 # env-dep:CARGO_PKG_NAME=crossbeam-utils

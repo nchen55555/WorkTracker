@@ -107,6 +107,19 @@ CREATE TABLE public.sync_logs (
   completed_at TIMESTAMPTZ
 );
 
+-- Time entries (multiple time blocks per task)
+CREATE TABLE public.time_entries (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  task_id UUID REFERENCES public.tasks(id) ON DELETE CASCADE NOT NULL,
+  scheduled_date DATE NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  duration_minutes INTEGER NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Indexes for performance
 CREATE INDEX idx_tasks_user_date ON public.tasks(user_id, scheduled_date);
 CREATE INDEX idx_meetings_user_date ON public.meetings(user_id, scheduled_date);
@@ -116,6 +129,9 @@ CREATE INDEX idx_meetings_google_event ON public.meetings(google_event_id) WHERE
 CREATE INDEX idx_categories_user_type ON public.categories(user_id, type);
 CREATE INDEX idx_tasks_archived ON public.tasks(user_id, is_archived);
 CREATE INDEX idx_reminders_archived ON public.reminders(user_id, is_archived);
+CREATE INDEX idx_time_entries_user ON public.time_entries(user_id);
+CREATE INDEX idx_time_entries_task ON public.time_entries(task_id);
+CREATE INDEX idx_time_entries_date ON public.time_entries(user_id, scheduled_date);
 
 -- Enable Row Level Security
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -123,6 +139,7 @@ ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.meetings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reminders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.time_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sync_logs ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies (users can only access their own data)
@@ -139,6 +156,9 @@ CREATE POLICY "Users can manage own meetings" ON public.meetings
   FOR ALL USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can manage own reminders" ON public.reminders
+  FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage own time entries" ON public.time_entries
   FOR ALL USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can view own sync logs" ON public.sync_logs
@@ -185,4 +205,8 @@ CREATE TRIGGER update_meetings_updated_at
 
 CREATE TRIGGER update_reminders_updated_at
   BEFORE UPDATE ON public.reminders
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+CREATE TRIGGER update_time_entries_updated_at
+  BEFORE UPDATE ON public.time_entries
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
