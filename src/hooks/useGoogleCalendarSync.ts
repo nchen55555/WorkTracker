@@ -147,6 +147,18 @@ export function useGoogleCalendarSync() {
 
     console.log(`Fetched ${events.length} events for ${account.email}`);
 
+    // Filter out events the user hasn't accepted.
+    // Keep events where: no attendees (user-created), user accepted, or user is tentative.
+    // Drop events where user declined or hasn't responded (needsAction).
+    events = events.filter((event) => {
+      if (!event.attendees || event.attendees.length === 0) return true;
+      const self = event.attendees.find((a) => a.self);
+      if (!self) return true; // no self entry means user is the organizer
+      return self.responseStatus === "accepted" || self.responseStatus === "tentative";
+    });
+
+    console.log(`After filtering non-accepted: ${events.length} events`);
+
     if (events.length === 0) {
       return 0;
     }
@@ -266,7 +278,36 @@ export function useGoogleCalendarSync() {
       }
     }
 
-    // Get all existing Google event IDs
+    // Clean up meetings for events the user has declined or not responded to.
+    // Fetch all Google-sourced meetings for the synced calendars, then delete
+    // any whose google_event_id is no longer in the filtered events list.
+    const filteredEventIds = new Set(events.map((e) => e.id));
+
+    const { data: allSyncedMeetings } = await db
+      .from("meetings")
+      .select("id, google_event_id")
+      .eq("user_id", userId)
+      .eq("is_from_google", true)
+      .in("google_calendar_id", calendarIds);
+
+    const toDelete = (allSyncedMeetings || []).filter(
+      (m) => m.google_event_id && !filteredEventIds.has(m.google_event_id)
+    );
+
+    if (toDelete.length > 0) {
+      const deleteIds = toDelete.map((m) => m.id);
+      const { error: deleteError } = await db
+        .from("meetings")
+        .delete()
+        .in("id", deleteIds);
+      if (deleteError) {
+        console.error("[Sync] Error deleting declined/removed meetings:", deleteError);
+      } else {
+        console.log(`[Sync] Deleted ${toDelete.length} declined/removed meetings for ${account.email}`);
+      }
+    }
+
+    // Get all existing Google event IDs (from filtered events only)
     const googleEventIds = events.map((e) => e.id);
     const { data: existingMeetings } = await db
       .from("meetings")
@@ -285,12 +326,10 @@ export function useGoogleCalendarSync() {
     for (const event of events) {
       const meetingData = mapGoogleEventToMeeting(event);
 
-      // Override title for freeBusyReader calendars
+      // Override title for freeBusyReader calendars — always use the
+      // custom title since the user only has free/busy access
       if (event.calendarId && freeBusyTitleMap.has(event.calendarId)) {
-        const customTitle = freeBusyTitleMap.get(event.calendarId)!;
-        if (!event.summary || meetingData.title === "(No title)") {
-          meetingData.title = customTitle;
-        }
+        meetingData.title = freeBusyTitleMap.get(event.calendarId)!;
       }
 
       const existingId = existingMap.get(event.id);
@@ -364,7 +403,7 @@ export function useGoogleCalendarSync() {
       );
     }
 
-    console.log(`${account.email}: Inserted ${toInsert.length}, updated ${toUpdate.length} meetings`);
+    console.log(`${account.email}: Inserted ${toInsert.length}, updated ${toUpdate.length}, deleted ${toDelete.length} meetings`);
 
     return events.length;
   }

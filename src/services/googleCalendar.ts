@@ -71,7 +71,7 @@ export interface GoogleCalendarEvent {
   description?: string;
   start: { dateTime?: string; date?: string; timeZone?: string };
   end: { dateTime?: string; date?: string; timeZone?: string };
-  attendees?: Array<{ email: string; displayName?: string }>;
+  attendees?: Array<{ email: string; displayName?: string; responseStatus?: string; self?: boolean }>;
   location?: string;
   hangoutLink?: string;
   status: string;

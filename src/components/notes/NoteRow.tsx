@@ -87,7 +87,7 @@ export function NoteRow({
       <div className="flex-1 min-w-0 flex flex-col gap-1">
         <span
           className={cn(
-            "text-lg font-medium",
+            "text-lg font-medium break-words",
             note.isCompleted
               ? "text-text-muted line-through"
               : "text-text-primary"
@@ -98,7 +98,7 @@ export function NoteRow({
         {note.content && (
           <p
             className={cn(
-              "text-sm leading-relaxed whitespace-pre-wrap",
+              "text-sm leading-relaxed whitespace-pre-wrap break-words",
               note.isCompleted ? "text-text-muted" : "text-text-secondary"
             )}
           >

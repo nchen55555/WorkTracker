@@ -57,12 +57,17 @@ export function EventBlock({ event, style, onClick, onResizeStart, onMoveStart, 
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    if (!mouseDownPos.current) return;
+    e.stopPropagation();
+    if (!mouseDownPos.current) {
+      onClick?.();
+      return;
+    }
 
     const dx = e.clientX - mouseDownPos.current.x;
     const dy = e.clientY - mouseDownPos.current.y;
+    mouseDownPos.current = null;
 
-    if (Math.abs(dx) <= 3 && Math.abs(dy) <= 3) {
+    if (Math.abs(dx) <= 5 && Math.abs(dy) <= 5) {
       onClick?.();
     }
   };

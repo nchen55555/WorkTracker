@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:web": "VITE_BASE_PATH=/worktracker/app/ vite build --outDir landing/app",
     "preview": "vite preview",
     "tauri": "tauri"
   },

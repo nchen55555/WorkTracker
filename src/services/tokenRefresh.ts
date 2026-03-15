@@ -97,7 +97,7 @@ export async function redirectToGoogleLogin(): Promise<void> {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: window.location.origin,
+      redirectTo: window.location.origin + import.meta.env.BASE_URL,
       scopes: GOOGLE_SCOPES,
       queryParams: {
         access_type: "offline",
@@ -385,7 +385,7 @@ export function addGoogleAccount(): void {
   localStorage.setItem(OAUTH_STATE_KEY, state);
 
   // Build the OAuth URL - redirect back to app root
-  const redirectUri = window.location.origin + "/";
+  const redirectUri = window.location.origin + import.meta.env.BASE_URL;
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID);

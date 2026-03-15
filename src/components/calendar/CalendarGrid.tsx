@@ -151,10 +151,12 @@ export function CalendarGrid({
 
   // Drag-to-move state
   const [isMoving, setIsMoving] = useState(false);
+  const [movePending, setMovePending] = useState(false);
   const [movingEvent, setMovingEvent] = useState<CalendarEvent | null>(null);
   const [moveStartY, setMoveStartY] = useState<number>(0);
   const [moveCurrentY, setMoveCurrentY] = useState<number>(0);
   const [moveTargetDate, setMoveTargetDate] = useState<string | null>(null);
+  const moveStartScreenY = useRef<number>(0);
   const moveColumnRef = useRef<HTMLDivElement | null>(null);
   const dayColumnsRef = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -257,15 +259,16 @@ export function CalendarGrid({
       resizeColumnRef.current = null;
     }
     // Cancel move if mouse leaves the calendar
-    if (isMoving) {
+    if (isMoving || movePending) {
       setIsMoving(false);
+      setMovePending(false);
       setMovingEvent(null);
       setMoveStartY(0);
       setMoveCurrentY(0);
       setMoveTargetDate(null);
       moveColumnRef.current = null;
     }
-  }, [isDragging, isResizing, isMoving]);
+  }, [isDragging, isResizing, isMoving, movePending]);
 
   // Resize handlers
   const handleResizeStart = useCallback((e: React.MouseEvent, event: CalendarEvent, edge: "top" | "bottom", columnEl: HTMLDivElement) => {
@@ -341,12 +344,12 @@ export function CalendarGrid({
   // Move handlers
   const handleMoveStart = useCallback((e: React.MouseEvent, event: CalendarEvent, columnEl: HTMLDivElement, dateStr: string) => {
     e.stopPropagation();
-    e.preventDefault();
 
     const rect = columnEl.getBoundingClientRect();
     const y = e.clientY - rect.top;
 
-    setIsMoving(true);
+    moveStartScreenY.current = e.clientY;
+    setMovePending(true);
     setMovingEvent(event);
     setMoveStartY(y);
     setMoveCurrentY(y);
@@ -398,6 +401,7 @@ export function CalendarGrid({
 
     // Reset move state
     setIsMoving(false);
+    setMovePending(false);
     setMovingEvent(null);
     setMoveStartY(0);
     setMoveCurrentY(0);
@@ -439,17 +443,34 @@ export function CalendarGrid({
 
   // Global mouse up listener for move
   useEffect(() => {
-    if (isMoving) {
-      const handleGlobalMouseUp = () => handleMoveEnd();
+    if (movePending || isMoving) {
+      const handleGlobalMouseUp = () => {
+        if (!isMoving) {
+          // Was pending but never committed — this is a click
+          setMovePending(false);
+          setMovingEvent(null);
+          setMoveTargetDate(null);
+          moveColumnRef.current = null;
+          return;
+        }
+        handleMoveEnd();
+      };
       window.addEventListener("mouseup", handleGlobalMouseUp);
       return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
     }
-  }, [isMoving, handleMoveEnd]);
+  }, [movePending, isMoving, handleMoveEnd]);
 
   // Global mouse move listener for move
   useEffect(() => {
-    if (isMoving) {
+    if (movePending || isMoving) {
       const handleGlobalMouseMove = (e: MouseEvent) => {
+        // If still pending, check if mouse moved enough to commit to moving
+        if (!isMoving) {
+          const dy = Math.abs(e.clientY - moveStartScreenY.current);
+          if (dy < 5) return;
+          setIsMoving(true);
+        }
+
         // Find which day column the mouse is over
         const found: { column: HTMLDivElement; date: string } | null = (() => {
           for (const [dateStr, col] of dayColumnsRef.current.entries()) {
@@ -473,7 +494,7 @@ export function CalendarGrid({
       window.addEventListener("mousemove", handleGlobalMouseMove);
       return () => window.removeEventListener("mousemove", handleGlobalMouseMove);
     }
-  }, [isMoving, endHour, startHour]);
+  }, [movePending, isMoving, endHour, startHour]);
 
   // Update current time every minute
   useEffect(() => {
@@ -648,7 +669,7 @@ export function CalendarGrid({
                           left: `${(column / totalColumns) * 100}%`,
                           width: `${(1 / totalColumns) * 100}%`,
                         }}
-                        onClick={() => !isResizing && !isMoving && onEventClick?.(event)}
+                        onClick={() => onEventClick?.(event)}
                         onResizeStart={(e, edge) => {
                           const columnEl = e.currentTarget.closest('[data-day-column]') as HTMLDivElement;
                           if (columnEl) {

@@ -121,7 +121,7 @@ export function useCreateTask() {
           }
 
           const newTaskId = crypto.randomUUID();
-          const insertPayload = {
+          const insertPayload: Record<string, unknown> = {
             id: newTaskId,
             user_id: user.id,
             category_id: validCategoryId,
@@ -129,6 +129,10 @@ export function useCreateTask() {
             description: input.description,
             is_completed: false,
           };
+          if (input.scheduledDate) insertPayload.scheduled_date = input.scheduledDate;
+          if (input.startTime) insertPayload.start_time = input.startTime;
+          if (input.endTime) insertPayload.end_time = input.endTime;
+          if (input.durationMinutes) insertPayload.duration_minutes = input.durationMinutes;
           console.log("[useCreateTask] Insert payload:", insertPayload);
 
           const { data, error } = await supabase
@@ -231,6 +235,10 @@ export function useUpdateTask() {
       if (updates.description !== undefined) updatePayload.description = updates.description;
       if (updates.isCompleted !== undefined) updatePayload.is_completed = updates.isCompleted;
       if (updates.isArchived !== undefined) updatePayload.is_archived = updates.isArchived;
+      if (updates.scheduledDate !== undefined) updatePayload.scheduled_date = updates.scheduledDate;
+      if (updates.startTime !== undefined) updatePayload.start_time = updates.startTime;
+      if (updates.endTime !== undefined) updatePayload.end_time = updates.endTime;
+      if (updates.durationMinutes !== undefined) updatePayload.duration_minutes = updates.durationMinutes;
 
       const { error } = await supabase
         .from("tasks")

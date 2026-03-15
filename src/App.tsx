@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
 import { AuthPage } from "./components/auth/AuthPage";
 // import { DebugPanel } from "./components/debug/DebugPanel";
@@ -12,7 +12,7 @@ import {
 } from "./services/tokenRefresh";
 
 // Check if this is an OAuth callback before rendering main app
-const isOAuthCallback = window.location.pathname === "/oauth/callback";
+const isOAuthCallback = window.location.pathname.endsWith("/oauth/callback");
 // Check if returning from redirect-based OAuth for adding account
 const isAddAccountCallback = isOAuthAddAccountCallback();
 
@@ -61,8 +61,15 @@ function AddAccountCallbackHandler({
 }) {
   const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const processedRef = useRef(false);
 
   useEffect(() => {
+    // Guard against React StrictMode double-execution — the first run
+    // clears the cached params/localStorage/hash, so a second run would
+    // always hit "No OAuth state found" even though the account was added.
+    if (processedRef.current) return;
+    processedRef.current = true;
+
     processOAuthAddAccountCallback()
       .then((result) => {
         if (!result.success && result.error) {

@@ -50,22 +50,43 @@ export function LeftPanel() {
   const deleteMeeting = useDeleteMeeting();
 
   // Task handlers
-  const handleSaveTask = async (taskData: Partial<Task>) => {
+  const handleSaveTask = async (
+    taskData: Partial<Task>,
+    pendingTimeBlocks?: Array<{
+      scheduledDate: string;
+      startTime: string;
+      endTime: string;
+      durationMinutes: number;
+    }>
+  ) => {
+    console.log("[handleSaveTask] called with:", taskData, "mode:", taskModalMode, "pendingBlocks:", pendingTimeBlocks?.length ?? 0);
     if (taskModalMode === "create") {
-      const newTask = await createTask.mutateAsync({
-        title: taskData.title!,
-        categoryId: taskData.categoryId,
-        description: taskData.description,
-      });
-      // Create a time entry if time was specified
-      if (newTask && taskData.startTime && taskData.endTime && taskData.scheduledDate && taskData.durationMinutes) {
-        createTimeEntry.mutate({
-          taskId: newTask.id,
+      let taskId: string;
+
+      if (taskData.id) {
+        // Existing task selected from dropdown — use its ID, no new task needed
+        taskId = taskData.id;
+      } else {
+        const newTask = await createTask.mutateAsync({
+          title: taskData.title!,
+          categoryId: taskData.categoryId,
+          description: taskData.description,
           scheduledDate: taskData.scheduledDate,
-          startTime: taskData.startTime,
-          endTime: taskData.endTime,
-          durationMinutes: taskData.durationMinutes,
         });
+        taskId = newTask.id;
+      }
+
+      // Create time entries from pending blocks
+      if (pendingTimeBlocks && pendingTimeBlocks.length > 0) {
+        for (const block of pendingTimeBlocks) {
+          await createTimeEntry.mutateAsync({
+            taskId,
+            scheduledDate: block.scheduledDate,
+            startTime: block.startTime,
+            endTime: block.endTime,
+            durationMinutes: block.durationMinutes,
+          });
+        }
       }
     } else if (editingTask) {
       updateTask.mutate({
@@ -74,8 +95,11 @@ export function LeftPanel() {
           title: taskData.title,
           description: taskData.description,
           categoryId: taskData.categoryId,
+          scheduledDate: taskData.scheduledDate,
         },
       });
+      // Time entries for existing tasks are managed directly in the modal
+      // via the "Add Time Block" button, so no auto-creation needed here.
     }
   };
 
@@ -125,6 +149,10 @@ export function LeftPanel() {
 
   return (
     <div className="flex flex-col h-full py-6 px-8 overflow-hidden">
+      <div className="flex items-center gap-2.5 mb-5">
+        <img src={`${import.meta.env.BASE_URL}icon.png`} alt="The Niche" className="w-8 h-8 rounded-lg" />
+        <span className="font-serif text-lg font-semibold text-[#C5A233]">The Niche</span>
+      </div>
       <div className="flex items-center mb-4">
         <ViewSelector />
       </div>

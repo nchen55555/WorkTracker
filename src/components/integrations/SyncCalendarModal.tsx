@@ -71,7 +71,7 @@ export function SyncCalendarModal({ isOpen, onClose }: SyncCalendarModalProps) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: window.location.origin + import.meta.env.BASE_URL,
           scopes: "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/userinfo.email",
           queryParams: {
             access_type: "offline",

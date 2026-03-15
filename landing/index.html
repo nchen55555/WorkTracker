@@ -144,6 +144,51 @@
             text-decoration: underline;
         }
 
+        /* Web app block */
+        .web-app-block {
+            margin-top: 32px;
+        }
+        .web-app-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .web-app-divider::before,
+        .web-app-divider::after {
+            content: "";
+            flex: 1;
+            border-top: 1px solid var(--border);
+        }
+        .web-app-btn {
+            display: block;
+            text-align: center;
+            padding: 14px 24px;
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            color: var(--gold);
+            font-weight: 500;
+            font-size: 15px;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        .web-app-btn:hover {
+            background: var(--gold);
+            color: var(--cream);
+        }
+        .web-app-note {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .web-app-note strong {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
         /* Divider */
         .divider {
             border: none;
@@ -228,6 +273,12 @@
                 </div>
             </div>
             <p class="alt-download">or <a href="/worktracker/public/Niche.dmg" download>download the .dmg directly</a></p>
+
+            <div class="web-app-block">
+                <div class="web-app-divider"><span>or</span></div>
+                <a href="/worktracker/app" class="web-app-btn">Use in your browser</a>
+                <p class="web-app-note">No download required — open <strong>theniche.tech/worktracker/app</strong> on any device.</p>
+            </div>
         </section>
 
         <hr class="divider">
